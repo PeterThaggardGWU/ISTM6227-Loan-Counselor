@@ -1,0 +1,43 @@
+# ══════════════════════════════════════════════════════════════
+# Loan Arranger — requirements.txt
+# Python 3.11.x  |  Windows + CUDA 13.1 (RTX 5090)
+#
+# Install order matters — run the PyTorch line first:
+#
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+#   pip install -r requirements.txt
+#
+# NOTE: cuDF (RAPIDS) is Linux-only and is NOT included here.
+# The preprocessing script falls back to CPU pandas automatically.
+# If you later want GPU preprocessing, run 01_preprocess.py
+# under WSL2 with cudf-cu13 installed there.
+# ══════════════════════════════════════════════════════════════
+
+# ── Training pipeline ──────────────────────────────────────────
+torch>=2.4.0            # installed separately via --index-url above
+lightgbm>=4.3.0         # gradient boosted trees; GPU via device='gpu'
+pandas>=2.1.0           # CPU dataframe (cuDF fallback)
+numpy>=1.26.0
+pyarrow>=15.0.0         # parquet read/write
+scikit-learn>=1.4.0     # preprocessing, train/test split, calibration
+shap>=0.45.0            # feature importance / explainability
+umap-learn>=0.5.6       # embedding visualisation
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tqdm>=4.66.0            # progress bars
+
+# ── Inference service ──────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.0
+joblib>=1.4.0           # LightGBM pipeline serialisation
+httpx>=0.27.0           # async HTTP client (used in tests)
+
+# ── MCP server ─────────────────────────────────────────────────
+mcp>=1.0.0              # Anthropic MCP SDK
+
+# ── Dev / testing ──────────────────────────────────────────────
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+python-dotenv>=1.0.0    # .env support for local config
+

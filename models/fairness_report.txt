@@ -1,0 +1,64 @@
+Loan Arranger — Fairness Analysis Report
+Model A (includes demographic features)
+============================================================
+
+Dimension: derived_race
+----------------------------------------
+  Group                                          Approval  DI Ratio     TPR     FPR         N
+  ------------------------------------------------------------------------------------------
+  2 or more minority races                          1.000     1.000   1.000   1.000    14,485
+  American Indian or Alaska Native                  1.000     1.000   1.000   1.000    42,458
+  Asian                                             1.000     1.000   1.000   1.000   458,653
+  Black or African American                         1.000     1.000   1.000   1.000   547,732
+  Free Form Text Only                               1.000     1.000   1.000   1.000     1,411
+  Joint                                             1.000     1.000   1.000   1.000   156,627
+  Native Hawaiian or Other Pacific Islander         1.000     1.000   1.000   1.000    18,623
+  Race Not Available                                1.000     1.000   1.000   1.000  1,301,034
+  White                                             1.000     1.000   1.000   1.000  5,088,884
+
+  ✓  All groups above 0.8 DI threshold
+
+Dimension: derived_ethnicity
+----------------------------------------
+  Group                                          Approval  DI Ratio     TPR     FPR         N
+  ------------------------------------------------------------------------------------------
+  Ethnicity Not Available                           1.000     1.000   1.000   1.000  1,245,902
+  Free Form Text Only                               1.000     1.000   1.000   1.000     3,209
+  Hispanic or Latino                                1.000     1.000   1.000   1.000   754,274
+  Joint                                             1.000     1.000   1.000   1.000   175,401
+  Not Hispanic or Latino                            1.000     1.000   1.000   1.000  5,451,121
+
+  ✓  All groups above 0.8 DI threshold
+
+Dimension: derived_sex
+----------------------------------------
+  Group                                          Approval  DI Ratio     TPR     FPR         N
+  ------------------------------------------------------------------------------------------
+  Female                                            1.000     1.000   1.000   1.000  1,617,554
+  Joint                                             1.000     1.000   1.000   1.000  2,837,358
+  Male                                              1.000     1.000   1.000   1.000  2,484,468
+  Sex Not Available                                 1.000     1.000   1.000   1.000   690,527
+
+  ✓  All groups above 0.8 DI threshold
+
+Dimension: applicant_age
+----------------------------------------
+  Group                                          Approval  DI Ratio     TPR     FPR         N
+  ------------------------------------------------------------------------------------------
+  25-34                                             1.000     1.000   1.000   1.000  1,432,065
+  35-44                                             1.000     1.000   1.000   1.000  1,890,857
+  45-54                                             1.000     1.000   1.000   1.000  1,669,441
+  55-64                                             1.000     1.000   1.000   1.000  1,296,134
+  65-74                                             1.000     1.000   1.000   1.000   743,731
+  8888                                              1.000     1.000   1.000   1.000   127,025
+  <25                                               1.000     1.000   1.000   1.000   205,435
+  >74                                               1.000     1.000   1.000   1.000   265,215
+
+  ✓  All groups above 0.8 DI threshold
+
+Notes:
+  DI Ratio = group approval rate / highest group approval rate
+  ECOA / fair lending scrutiny threshold: DI Ratio < 0.8
+  TPR = True Positive Rate (approved applicants correctly predicted approved)
+  FPR = False Positive Rate (denied applicants incorrectly predicted approved)
+  Model B excludes all demographic features and is the default deployment model.

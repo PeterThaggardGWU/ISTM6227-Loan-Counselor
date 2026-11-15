@@ -1,0 +1,35 @@
+# ── Python / IDE ──────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.py[cod]
+.idea/
+.env
+*.orig
+
+# ── data/ ─────────────────────────────────────────────────────────────────────
+# Ignore everything in data/ (raw HMDA LAR files are 4-10 GB each and are
+# downloadable from the FFIEC; intermediate parquets are rebuilt by
+# 01_preprocess.py and 01b_merge.py), then allow back the small files the
+# service needs at runtime and the small inputs to the lookup-builder scripts.
+data/*
+
+# Runtime files loaded by model_loader.py
+!data/feature_stats.parquet
+!data/lei_index.parquet
+!data/lender_names.parquet
+!data/county_fips.parquet
+!data/merge_manifest.json
+!data/lender_meta.parquet
+
+# Inputs to build_lender_names.py and build_county_lookup.py
+!data/lei-catalogs/
+!data/national_county.txt
+
+# ── models/ ───────────────────────────────────────────────────────────────────
+# Committed: lgbm_model_a/b.pkl and embedding_weights.pt (loaded by the
+# service), plus the training summary, feature-importance and fairness reports.
+# Not committed (not needed to run the service; delete a line to include it):
+# Full training checkpoint, including optimizer state
+models/embedding_network.pt
+# Same LightGBM models in LightGBM's native text format
+models/lgbm_model_*.txt

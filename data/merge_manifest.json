@@ -1,0 +1,50 @@
+{
+  "created_at": "2026-04-13T16:00:05.667736+00:00",
+  "years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "data_dir": "data",
+  "row_counts": {
+    "model_a": 76299062,
+    "model_b": 76299062
+  },
+  "vocab_sizes": {
+    "lei": 6103,
+    "census_tract": 96846,
+    "county_code": 3236
+  },
+  "model_a_cols": [
+    "applicant_age",
+    "census_tract",
+    "co_applicant_age",
+    "combined_loan_to_value_ratio",
+    "county_code",
+    "county_idx",
+    "debt_to_income_ratio",
+    "derived_ethnicity",
+    "derived_loan_product_type",
+    "derived_race",
+    "derived_sex",
+    "hmda_year",
+    "income",
+    "interest_rate",
+    "label",
+    "lei",
+    "lender_idx",
+    "lien_status",
+    "loan_amount",
+    "loan_purpose",
+    "loan_type",
+    "occupancy_type",
+    "property_value",
+    "state_code",
+    "total_loan_costs",
+    "tract_idx"
+  ],
+  "elapsed_seconds": 151.6
+}

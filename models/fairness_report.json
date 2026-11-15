@@ -1,0 +1,234 @@
+{
+  "derived_race": {
+    "groups": {
+      "2 or more minority races": {
+        "n": 14485,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "American Indian or Alaska Native": {
+        "n": 42458,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Asian": {
+        "n": 458653,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Black or African American": {
+        "n": 547732,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Free Form Text Only": {
+        "n": 1411,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Joint": {
+        "n": 156627,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Native Hawaiian or Other Pacific Islander": {
+        "n": 18623,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Race Not Available": {
+        "n": 1301034,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "White": {
+        "n": 5088884,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      }
+    },
+    "groups_below_0.8": [],
+    "threshold_used": 0.5
+  },
+  "derived_ethnicity": {
+    "groups": {
+      "Ethnicity Not Available": {
+        "n": 1245902,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Free Form Text Only": {
+        "n": 3209,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Hispanic or Latino": {
+        "n": 754274,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Joint": {
+        "n": 175401,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Not Hispanic or Latino": {
+        "n": 5451121,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      }
+    },
+    "groups_below_0.8": [],
+    "threshold_used": 0.5
+  },
+  "derived_sex": {
+    "groups": {
+      "Female": {
+        "n": 1617554,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Joint": {
+        "n": 2837358,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Male": {
+        "n": 2484468,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "Sex Not Available": {
+        "n": 690527,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      }
+    },
+    "groups_below_0.8": [],
+    "threshold_used": 0.5
+  },
+  "applicant_age": {
+    "groups": {
+      "25-34": {
+        "n": 1432065,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "35-44": {
+        "n": 1890857,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "45-54": {
+        "n": 1669441,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "55-64": {
+        "n": 1296134,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "65-74": {
+        "n": 743731,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "8888": {
+        "n": 127025,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      "<25": {
+        "n": 205435,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      },
+      ">74": {
+        "n": 265215,
+        "approval_rate": 1.0,
+        "avg_probability": 0.5964,
+        "tpr": 1.0,
+        "fpr": 1.0,
+        "disparate_impact_ratio": 1.0
+      }
+    },
+    "groups_below_0.8": [],
+    "threshold_used": 0.5
+  }
+}

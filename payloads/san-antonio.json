@@ -1,0 +1,14 @@
+{
+  "state_code": "TX",
+  "county_code": "48029",
+  "loan_amount": 350000,
+  "income": 150000,
+  "loan_purpose": 1,
+  "loan_type": 1,
+  "lien_status": 1,
+  "occupancy_type": 1,
+  "property_value": 425000,
+  "debt_to_income_ratio": 28.0,
+  "top_k": 5,
+  "model_variant": "B"
+}

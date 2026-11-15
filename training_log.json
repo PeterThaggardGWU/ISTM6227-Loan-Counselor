@@ -1,0 +1,56 @@
+{
+  "best_epoch": 1,
+  "best_val_auc": 0.8749215935351365,
+  "emb_dims": {
+    "lender": 64,
+    "tract": 32,
+    "county": 16
+  },
+  "vocab_sizes": {
+    "lender": 6103,
+    "tract": 96846,
+    "county": 3236
+  },
+  "n_continuous": 13,
+  "hidden_sizes": [
+    256,
+    128,
+    64
+  ],
+  "dropout": 0.3,
+  "use_demographics": true,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.318478,
+      "train_auc": 0.858317,
+      "val_loss": 0.307594,
+      "val_auc": 0.874922,
+      "elapsed_s": 3633.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.297394,
+      "train_auc": 0.877591,
+      "val_loss": 0.316906,
+      "val_auc": 0.870727,
+      "elapsed_s": 4180.4
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.294316,
+      "train_auc": 0.880308,
+      "val_loss": 0.313217,
+      "val_auc": 0.873241,
+      "elapsed_s": 3649.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.290649,
+      "train_auc": 0.883484,
+      "val_loss": 0.311678,
+      "val_auc": 0.874429,
+      "elapsed_s": 3831.6
+    }
+  ]
+}
