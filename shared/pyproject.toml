@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mrn-shared"
+version = "0.1.0"
+description = "Shared case-file schema for Mortgage Readiness Navigator"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,11 +1,18 @@
 # ══════════════════════════════════════════════════════════════
-# Loan Arranger — requirements.txt
-# Python 3.11.x  |  Windows + CUDA 13.1 (RTX 5090)
+# Lender Match — requirements.in  (the packages we chose)
+# Python 3.11.x  |  Windows; training uses an RTX 5090
 #
-# Install order matters — run the PyTorch line first:
+# This file lists direct dependencies with minimum versions.
+# requirements.txt is the exact, pinned set (pip freeze) that the
+# service is known to work with. Install from that one:
 #
-#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 #   pip install -r requirements.txt
+#
+# That installs the CPU build of PyTorch, which is all the service
+# needs. For retraining on the RTX 5090 (Blackwell), replace it with
+# a CUDA 12.8+ build; older CUDA builds can't use the card:
+#
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
 #
 # NOTE: cuDF (RAPIDS) is Linux-only and is NOT included here.
 # The preprocessing script falls back to CPU pandas automatically.

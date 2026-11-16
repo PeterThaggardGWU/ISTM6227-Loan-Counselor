@@ -1,35 +1,52 @@
-# ── Python / IDE ──────────────────────────────────────────────────────────────
+# ── Python / IDE (these patterns match in every folder) ───────────────────────
 .venv/
 __pycache__/
 *.py[cod]
 .idea/
 .env
+# Secrets: never commit keys
+istm-6227-key
+*.key
+*-key
+*.pem
 *.orig
+*.egg-info/
+build/
+.pytest_cache/
 
-# ── data/ ─────────────────────────────────────────────────────────────────────
-# Ignore everything in data/ (raw HMDA LAR files are 4-10 GB each and are
-# downloadable from the FFIEC; intermediate parquets are rebuilt by
+# ── lender_match/data/ ────────────────────────────────────────────────────────
+# Ignore everything in lender_match/data/ (raw HMDA LAR files are 4-10 GB each
+# and are downloadable from the FFIEC; intermediate parquets are rebuilt by
 # 01_preprocess.py and 01b_merge.py), then allow back the small files the
 # service needs at runtime and the small inputs to the lookup-builder scripts.
-data/*
+# Note: a pattern containing "/" is matched from this file's folder (the repo
+# root), so every path below spells out lender_match/.
+lender_match/data/*
 
-# Runtime files loaded by model_loader.py
-!data/feature_stats.parquet
-!data/lei_index.parquet
-!data/lender_names.parquet
-!data/county_fips.parquet
-!data/merge_manifest.json
-!data/lender_meta.parquet
+# Runtime files loaded by lender_match/model_loader.py
+!lender_match/data/feature_stats.parquet
+!lender_match/data/lei_index.parquet
+!lender_match/data/lender_names.parquet
+!lender_match/data/county_fips.parquet
+!lender_match/data/merge_manifest.json
+!lender_match/data/lender_meta.parquet
 
 # Inputs to build_lender_names.py and build_county_lookup.py
-!data/lei-catalogs/
-!data/national_county.txt
+!lender_match/data/lei-catalogs/
+!lender_match/data/national_county.txt
 
-# ── models/ ───────────────────────────────────────────────────────────────────
+# ── lender_match/models/ ──────────────────────────────────────────────────────
 # Committed: lgbm_model_a/b.pkl and embedding_weights.pt (loaded by the
 # service), plus the training summary, feature-importance and fairness reports.
 # Not committed (not needed to run the service; delete a line to include it):
 # Full training checkpoint, including optimizer state
-models/embedding_network.pt
+lender_match/models/embedding_network.pt
 # Same LightGBM models in LightGBM's native text format
-models/lgbm_model_*.txt
+lender_match/models/lgbm_model_*.txt
+
+# ── Other components ──────────────────────────────────────────────────────────
+# When risk/ (MRI) and policy/ arrive, add their large data and model files
+# here the same way: ignore the folder, then allow back what must be shared.
+
+# ── Temporary: MRI project copied from WSL for review (never commit) ──────────
+_mri_import/

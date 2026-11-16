@@ -1,0 +1,43 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	intake(intake)
+	lender_match(lender_match)
+	risk(risk)
+	policy(policy)
+	explainer(explainer)
+	critic(critic)
+	publish_report(publish_report)
+	await_borrower(await_borrower)
+	apply_what_if(apply_what_if)
+	finish(finish)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> intake;
+	apply_what_if -.-> await_borrower;
+	apply_what_if -.-> explainer;
+	apply_what_if -.-> lender_match;
+	apply_what_if -.-> policy;
+	apply_what_if -.-> risk;
+	await_borrower -.-> apply_what_if;
+	await_borrower -.-> finish;
+	critic -.-> explainer;
+	critic -.-> publish_report;
+	explainer --> critic;
+	intake -.-> explainer;
+	intake -.-> lender_match;
+	intake -.-> policy;
+	intake -.-> risk;
+	lender_match --> explainer;
+	policy --> explainer;
+	publish_report -.-> await_borrower;
+	publish_report -.-> finish;
+	risk --> explainer;
+	finish --> __end__;
+	await_borrower -.-> await_borrower;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

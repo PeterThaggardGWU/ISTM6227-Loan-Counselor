@@ -1,0 +1,18 @@
+# Orchestrator — direct dependencies. Python 3.11. Install from this folder:
+#
+#   pip install -r requirements.in
+#
+# Once everything works, pin the exact set:  pip freeze > requirements.txt
+# (then teammates install with  pip install -r requirements.txt).
+
+langgraph>=1.2
+langgraph-cli[inmem]          # `langgraph dev` + Studio
+langchain-anthropic           # Claude, for the LLM agents (not used by the stand-ins)
+langchain-mcp-adapters        # MCP tools for LLM agents
+pydantic>=2.7
+httpx                         # calls the Lender Match service
+python-dotenv
+pytest
+
+-e ../shared                  # mrn_shared: the case-file schema
+-e .                          # this package (navigator)

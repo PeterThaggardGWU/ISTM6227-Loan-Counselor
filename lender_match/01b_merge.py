@@ -61,7 +61,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent
 DATA_DIR  = REPO_ROOT / "data"
 
 # ── Embedding index column definitions ───────────────────────────────────────
