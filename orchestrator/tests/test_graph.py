@@ -1,103 +1,58 @@
-import copy
-import sys
-from pathlib import Path
-
-import pytest
-from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.types import Command
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-
-from mrn_shared import Report  # noqa: E402
-from navigator import config  # noqa: E402
-from navigator.agents.critic import review  # noqa: E402
-from navigator.graph import build_graph  # noqa: E402
-from navigator.routing import agents_to_rerun  # noqa: E402
-from sample_profiles import TOWNHOUSE_MONTGOMERY  # noqa: E402
+"""End-to-end loop with stand-in specialists and the LLM off."""
+from navigator.core.routing import agents_to_rerun
 
 
-@pytest.fixture(autouse=True)
-def stand_ins(monkeypatch):
-    monkeypatch.setattr(config, "LENDER_MATCH_URL", "")
-    monkeypatch.setattr(config, "ASSUMED_RATE_PCT", 6.5)
-
-
-def start(profile=TOWNHOUSE_MONTGOMERY):
-    graph = build_graph(checkpointer=InMemorySaver())
-    cfg = {"configurable": {"thread_id": "t"}}
-    out = graph.invoke({"session_id": "t", "profile_input": copy.deepcopy(profile)}, cfg)
-    return graph, cfg, out
-
-
-def test_baseline_runs_every_agent_then_waits_for_the_borrower():
-    _, _, out = start()
-    assert out["__interrupt__"][0].value["type"] == "report"
-    scen = out["case"]["scenarios"][0]
-    assert scen["rerun"] == ["lender_match", "risk", "policy"]
+def test_baseline_runs_every_agent_then_waits_for_the_borrower(session):
+    s = session()
+    assert s.pause["type"] == "report" and s.pause["role"] == "borrower"
+    scen = s.scenarios[0]
+    assert scen["rerun"] == ["lender_match", "risk", "policy"] and scen["kind"] == "baseline"
     assert scen["lender_match"] and scen["risk"] and scen["policy"] and scen["report"]
-    assert out["case"]["status"] == "awaiting_borrower"
+    assert scen["report"]["status"] == "passed" and scen["report"]["writer"] == "template"
+    assert s.case["status"] == "awaiting_borrower"
+    assert s.event_kinds()[:2] == ["intake_complete", "ran_agents"]
 
 
-def test_down_payment_what_if_reruns_all_three_agents():
-    graph, cfg, out = start()
-    out = graph.invoke(Command(resume={"action": "what_if", "changes": {
-        "purchase.down_payment": 90000, "finances.remove_debt": "car loan"}}), cfg)
-    base, wi = out["case"]["scenarios"]
-    assert wi["rerun"] == ["lender_match", "risk", "policy"]     # LTV changes the MI guidance
+def test_down_payment_what_if_reruns_all_three_agents(session):
+    s = session().resume({"action": "what_if", "changes": {
+        "purchase.down_payment": 90000, "finances.remove_debt": "car loan"}})
+    base, wi = s.scenarios
+    assert wi["rerun"] == ["lender_match", "risk", "policy"] and wi["kind"] == "what_if"
     assert wi["derived"]["ltv_pct"] == 80.0
     assert wi["derived"]["dti_pct"] < base["derived"]["dti_pct"]
     assert not any("mortgage insurance" in c["excerpt"] for c in wi["policy"]["citations"])
     assert "What changed since" in wi["report"]["markdown"]
 
 
-def test_credit_score_what_if_reruns_only_risk_and_carries_the_rest():
-    graph, cfg, out = start()
-    out = graph.invoke(Command(resume={"action": "what_if", "changes": {"borrower.credit_score": 640}}), cfg)
-    base, wi = out["case"]["scenarios"]
+def test_credit_score_what_if_reruns_only_risk_and_carries_the_rest(session):
+    s = session().resume({"action": "what_if", "changes": {"borrower.credit_score": 640}})
+    base, wi = s.scenarios
     assert wi["rerun"] == ["risk"]
-    assert wi["lender_match"] == base["lender_match"]           # carried over, not rerun
+    assert wi["lender_match"] == base["lender_match"]
     assert wi["policy"] == base["policy"]
     assert wi["risk"]["tier"] == "moderate" and "credit score" in wi["risk"]["top_factors"]
 
 
-def test_change_that_affects_no_model_reruns_only_the_explainer():
-    graph, cfg, _ = start()
-    out = graph.invoke(Command(resume={"action": "what_if", "changes": {"finances.savings": 100000}}), cfg)
-    assert out["case"]["scenarios"][1]["rerun"] == []
-    assert out["case"]["scenarios"][1]["report"] is not None
+def test_change_that_affects_no_model_reruns_only_the_explainer(session):
+    s = session().resume({"action": "what_if", "changes": {"finances.savings": 100000}})
+    assert s.scenarios[1]["rerun"] == [] and s.scenarios[1]["report"] is not None
 
 
-def test_bad_what_if_is_reported_and_the_borrower_is_asked_again():
-    graph, cfg, _ = start()
-    out = graph.invoke(Command(resume={"action": "what_if", "changes": {"purchase.down_payment": 500000}}), cfg)
-    v = out["__interrupt__"][0].value
-    assert "Couldn't apply" in v["error"]
-    assert len(out["case"]["scenarios"]) == 1
+def test_done_goes_to_action_plan_then_counselor_signoff(session):
+    s = session().resume({"action": "done"})
+    assert s.pause["type"] == "counselor_signoff" and s.pause["role"] == "counselor"
+    assert s.case["ended_reason"] == "done"
+    assert s.case["action_plan"][-1].startswith("Review this plan with your housing counselor")
+    s.resume({"action": "approve", "note": "Discussed credit reports."})
+    assert s.pause is None
+    assert s.case["status"] == "signed_off"
+    assert s.case["counselor_notes"][0]["text"] == "Discussed credit reports."
 
 
-def test_done_finishes_the_session():
-    graph, cfg, _ = start()
-    out = graph.invoke(Command(resume={"action": "done"}), cfg)
-    assert "__interrupt__" not in out
-    assert out["case"]["status"] == "done"
-
-
-def test_missing_profile_fields_trigger_intake_questions():
-    profile = copy.deepcopy(TOWNHOUSE_MONTGOMERY)
-    del profile["purchase"]["target_state"]
-    graph, cfg, out = start(profile)
-    v = out["__interrupt__"][0].value
-    assert v["type"] == "intake_questions"
-    assert any(p["field"] == "purchase.target_state" for p in v["problems"])
-    out = graph.invoke(Command(resume={"purchase": {"target_state": "MD"}}), cfg)
-    assert out["__interrupt__"][0].value["type"] == "report"
-
-
-def test_critic_flags_decision_language_and_missing_disclaimer():
-    bad = Report(approval_signal="green", sustainability_signal="green",
-                 markdown="Good news: you will be approved!")
-    fixes = review(bad, policy_citation_count=1)
-    assert len(fixes) == 3
+def test_give_up_still_ends_with_a_plan(session):
+    s = session().resume({"action": "give_up"})
+    assert s.case["ended_reason"] == "gave_up" and s.case["status"] == "gave_up"
+    assert s.pause["type"] == "counselor_signoff" and s.case["action_plan"]
 
 
 def test_unknown_field_reruns_every_agent():

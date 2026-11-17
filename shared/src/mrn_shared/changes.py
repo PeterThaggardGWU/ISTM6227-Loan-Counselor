@@ -27,4 +27,4 @@ def apply_changes(profile: BorrowerProfile, changes: dict[str, Any]) -> Borrower
         if leaf not in node:
             raise KeyError(f"Unknown profile field: {path}")
         node[leaf] = value
-    return BorrowerProfile.model_validate(data)   # re-validates every field
+    return BorrowerProfile.model_validate(data)   # re-validates every field and the cross-field rules

@@ -1,0 +1,282 @@
+<title>Navigator Orchestrator Modules</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: a single reading column; the diagram and tables break out wider. Colors follow the architecture diagram: blue = Orchestrator, gray = Peter's specialists. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #1d2230; --muted: #5d6475; --line: #d9dde5;
+  --orch: #2a6fd6; --orch-soft: #e5eefb;
+  --mine: #1f8a70; --mine-soft: #e3f3ee;
+  --gray: #8a8f99; --gray-soft: #eceef1;
+  --human: #b2641c; --human-soft: #f8ecdf;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151c; --surface: #1a1e27; --fg: #e6e9ef; --muted: #9aa1b0; --line: #2d3340;
+  --orch: #6ea2f0; --orch-soft: #1c2a42; --mine: #4cc3a0; --mine-soft: #16302a;
+  --gray: #9aa0aa; --gray-soft: #262a32; --human: #e09a55; --human-soft: #33261a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12151c; --surface: #1a1e27; --fg: #e6e9ef; --muted: #9aa1b0; --line: #2d3340;
+  --orch: #6ea2f0; --orch-soft: #1c2a42; --mine: #4cc3a0; --mine-soft: #16302a;
+  --gray: #9aa0aa; --gray-soft: #262a32; --human: #e09a55; --human-soft: #33261a; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+h2 { font-size: 1.45rem; margin-bottom: 12px; }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 12px; }
+.eyebrow { font: 500 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--gray-soft); padding: 1px 5px; border-radius: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .9rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+.mod { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mod.orch { --c: var(--orch); } .mod.mine { --c: var(--mine); } .mod.human { --c: var(--human); } .mod.gray { --c: var(--gray); }
+.mod .job { color: var(--muted); font-size: .95rem; margin: 0; }
+.files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: .9rem; }
+.files li { display: grid; grid-template-columns: minmax(0, 11.5em) 1fr; gap: 10px; }
+.files code { background: none; padding: 0; color: var(--c); font-weight: 500; overflow-wrap: anywhere; }
+.tag { align-self: flex-start; font: 500 .72rem var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: var(--gray-soft); color: var(--muted); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .78rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+ol.steps { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+.note { border-left: 3px solid var(--orch); background: var(--orch-soft); padding: 12px 16px; border-radius: 0 6px 6px 0; max-width: 72ch; }
+</style>
+
+<div class="wrap">
+<header class="prose">
+  <div class="eyebrow">Mortgage Readiness Navigator · orchestrator/ · branch feat/orchestrator-agents</div>
+  <h1>Orchestrator modules: the non-gray side of the architecture</h1>
+  <p style="margin-top:14px">Peter owns the three specialists in the gray box: Lender Match, Risk and Policy. This page covers everything else in the architecture diagram: the Orchestrator, Intake, Explainer, Critic, the borrower and counselor loop, and the Stop step. Each box becomes its own Python package with one job, a small public interface, and a rule-based fallback so the whole loop runs and tests without an API key.</p>
+  <div class="legend">
+    <span><i class="sw" style="border-color:var(--orch);background:var(--orch-soft)"></i>Orchestrator core</span>
+    <span><i class="sw" style="border-color:var(--mine);background:var(--mine-soft)"></i>Agents I build</span>
+    <span><i class="sw" style="border-color:var(--human);background:var(--human-soft)"></i>Human-in-the-loop</span>
+    <span><i class="sw" style="border-color:var(--gray);background:var(--gray-soft)"></i>Peter's specialists (not touched)</span>
+  </div>
+</header>
+
+<section>
+  <h2>The graph, by module</h2>
+  <p class="prose">Every node belongs to exactly one package. Solid arrows always run; dashed arrows are routing decisions made by rules in <code>core/</code>, never by the LLM.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+  START([start]) --> intake
+  intake -. "questions (interrupt)" .-> intake
+  intake --> fan{{"core.routing<br/>only what changed"}}
+  fan --> lm[lender_match] & rk[risk] & pol[policy]
+  lm & rk & pol --> explainer
+  explainer --> critic
+  critic -. "fixes (≤ MAX_REVISIONS)" .-> explainer
+  critic -. pass .-> publish[publish_report]
+  critic -. "still failing" .-> counselor[counselor_review]
+  publish -. "escalation rule" .-> counselor
+  publish -. ok .-> borrower[await_borrower]
+  counselor --> borrower
+  borrower -. "what-if" .-> apply[apply_what_if]
+  apply -. "invalid / no-op" .-> borrower
+  apply --> fan
+  borrower -. "done / give up / max rounds" .-> plan[action_plan]
+  plan --> signoff[counselor_signoff]
+  signoff --> END([end])
+
+  classDef orch fill:#e5eefb,stroke:#2a6fd6,color:#1d2230
+  classDef mine fill:#e3f3ee,stroke:#1f8a70,color:#1d2230
+  classDef human fill:#f8ecdf,stroke:#b2641c,color:#1d2230
+  classDef gray fill:#eceef1,stroke:#8a8f99,color:#1d2230,stroke-dasharray:4 3
+  class fan,apply orch
+  class intake,explainer,critic,plan mine
+  class publish,borrower,counselor,signoff human
+  class lm,rk,pol gray
+</pre>
+  </div>
+</section>
+
+<section>
+  <h2>Packages</h2>
+  <p class="prose">Everything lives under <code>orchestrator/navigator/</code>. A package's <code>node.py</code> is the only thing <code>graph.py</code> imports from it; the other files are plain functions that tests call directly.</p>
+  <div class="grid">
+    <article class="mod orch">
+      <span class="tag">Orchestrator</span>
+      <h3>core/</h3>
+      <p class="job">Decides what runs, keeps the case file, and wraps Peter's agents so they can't crash a session.</p>
+      <ul class="files">
+        <li><code>case.py</code><span>load, save and query the case file</span></li>
+        <li><code>routing.py</code><span>"rerun only what changed" table, editable-field allow-list</span></li>
+        <li><code>specialists.py</code><span>timeout and error guard around each gray agent</span></li>
+        <li><code>stopping.py</code><span>max rounds, "nothing material changed", end reasons</span></li>
+        <li><code>escalation.py</code><span>when a counselor must look before the borrower does</span></li>
+        <li><code>CaseFile.log()</code><span>append-only audit log ("how did we get here"), kept on the case file itself</span></li>
+      </ul>
+    </article>
+    <article class="mod orch">
+      <span class="tag">Shared service</span>
+      <h3>llm/</h3>
+      <p class="job">The one place that calls Claude. Every agent uses it the same way.</p>
+      <ul class="files">
+        <li><code>client.py</code><span>structured output into a Pydantic model, refusal handling, <code>LLMUnavailable</code> when off or failing</span></li>
+      </ul>
+      <p class="job">Off by default in tests (<code>NAVIGATOR_LLM=off</code>), so agents fall back to their rule-based versions.</p>
+    </article>
+    <article class="mod mine">
+      <span class="tag">Agent</span>
+      <h3>intake/</h3>
+      <p class="job">Builds a complete, consistent profile and turns free-text what-ifs into field changes.</p>
+      <ul class="files">
+        <li><code>checks.py</code><span>consistency checks beyond field types (DTI over 50%, townhouse type)</span></li>
+        <li><code>questions.py</code><span>turns problems into at most 3 plain questions</span></li>
+        <li><code>extractor.py</code><span>LLM: borrower's words to a profile draft or a what-if</span></li>
+        <li><code>node.py</code><span>the interview loop; hands off to a counselor after the turn cap</span></li>
+      </ul>
+    </article>
+    <article class="mod mine">
+      <span class="tag">Agent</span>
+      <h3>explainer/</h3>
+      <p class="job">Writes the report. Colors and numbers come from code; the LLM only writes the words around them.</p>
+      <ul class="files">
+        <li><code>signals.py</code><span>the two traffic lights, computed by rule</span></li>
+        <li><code>facts.py</code><span>every number the report may state, with its source</span></li>
+        <li><code>template.py</code><span>deterministic report (fallback and evaluation baseline)</span></li>
+        <li><code>writer.py</code><span>LLM report from the facts, answering Critic fixes</span></li>
+        <li><code>node.py</code><span>picks writer or template</span></li>
+      </ul>
+    </article>
+    <article class="mod mine">
+      <span class="tag">Agent</span>
+      <h3>critic/</h3>
+      <p class="job">Checks every draft before a person sees it.</p>
+      <ul class="files">
+        <li><code>rules.py</code><span>decision language, steering, disclaimer, numbers match facts, citations real, signals match, protected traits</span></li>
+        <li><code>reviewer.py</code><span>LLM second opinion (smaller model, different prompt)</span></li>
+        <li><code>node.py</code><span>runs rules first, then the LLM review</span></li>
+      </ul>
+    </article>
+    <article class="mod human">
+      <span class="tag">Borrower + counselor</span>
+      <h3>human/</h3>
+      <p class="job">The pauses where a person answers. Each is a LangGraph <code>interrupt</code>.</p>
+      <ul class="files">
+        <li><code>borrower.py</code><span>publish report, wait for a reply, apply a what-if</span></li>
+        <li><code>counselor.py</code><span>review an escalated report; final sign-off</span></li>
+      </ul>
+    </article>
+    <article class="mod mine">
+      <span class="tag">Stop</span>
+      <h3>stop/</h3>
+      <p class="job">The session never ends without a word: it ends with an action plan the counselor signs.</p>
+      <ul class="files">
+        <li><code>action_plan.py</code><span>3 to 5 next steps from the best scenario (rules, LLM polish)</span></li>
+        <li><code>node.py</code><span>the action-plan node</span></li>
+      </ul>
+    </article>
+    <article class="mod gray">
+      <span class="tag">Peter · unchanged</span>
+      <h3>agents/</h3>
+      <p class="job">Lender Match, Risk, Policy. My code only calls them through <code>core/specialists.py</code>.</p>
+      <ul class="files">
+        <li><code>lender_match.py</code><span>Lender Match service</span></li>
+        <li><code>risk.py</code><span>Risk (stand-in until the model)</span></li>
+        <li><code>policy.py</code><span>Policy RAG (stand-in)</span></li>
+        <li><code>_common.py</code><span>kept for his imports; now re-exports <code>core/case.py</code></span></li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2>The contract with Peter's agents</h2>
+  <div class="prose">
+    <p>A specialist is any function <code>fn(state) -&gt; {"&lt;name&gt;": result_dict}</code> that reads the current scenario and returns a <code>LenderMatchResult</code>, <code>RiskResult</code> or <code>PolicyResult</code> from <code>mrn_shared</code>. That is already how his three agents work, so nothing changes for him.</p>
+    <p><code>core/specialists.guarded()</code> wraps each one. If it raises or runs past its timeout, the wrapper returns a result with <code>source="unavailable"</code>, the report says <em>not assessed</em>, and an event is logged. The report always goes out, and no stand-in numbers are made up.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Case file additions (shared schema v0.2)</h2>
+  <p class="prose">All additive, so existing case files still load.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Field</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>Source</code> adds <code>"unavailable"</code></td><td>A failed specialist is labeled, never replaced by fake numbers</td></tr>
+      <tr><td><code>Report.status</code>: draft, passed, needs_review, approved</td><td>A report that fails the Critic never reaches the borrower</td></tr>
+      <tr><td><code>Report.critic_rounds</code>, <code>original_markdown</code></td><td>Full review history; a counselor's edit keeps the original</td></tr>
+      <tr><td><code>Scenario.kind</code>, <code>Scenario.origin</code></td><td>Baseline, what-if or suggested; who asked for it</td></tr>
+      <tr><td><code>CaseFile.events</code>, <code>counselor_notes</code>, <code>action_plan</code>, <code>ended_reason</code></td><td>Audit log, counselor annotations, the final plan, and why the session stopped</td></tr>
+      <tr><td>Validators: income &gt; 0, down payment ≤ price and ≤ savings, county matches state</td><td>Bugs B3, B4, B5 and edge cases E-I2, E-I4, E-W2 from design.md</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>One round, step by step</h2>
+  <ol class="steps">
+    <li><strong>Intake</strong> merges the borrower's answers into the profile, runs the schema and <code>checks.py</code>, and asks up to 3 questions until nothing is missing or inconsistent.</li>
+    <li><strong>core.routing</strong> picks which specialists to run: all three for a new profile, only the affected ones after a what-if. Results from the others carry over.</li>
+    <li><strong>The specialists</strong> run in parallel, each inside <code>guarded()</code>.</li>
+    <li><strong>The Explainer</strong> computes the signals and the facts sheet, then writes the report with the LLM, or with the template when the LLM is off or fails.</li>
+    <li><strong>The Critic</strong> runs its rules, then the LLM review. Fixes go back to the Explainer, at most <code>MAX_REVISIONS</code> times.</li>
+    <li><strong>publish_report</strong> checks the escalation rules. A failed review, a red sustainability signal, or every service being down sends the report to <strong>counselor_review</strong> first.</li>
+    <li><strong>await_borrower</strong> shows the report. A what-if goes through the allow-list, the no-op check and the validators, then back to step 2. "Done", "give up" or the round limit goes to <strong>action_plan</strong>, then <strong>counselor_signoff</strong>.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Choices I made</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Choice</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td>Official <code>anthropic</code> SDK with <code>messages.parse</code> into Pydantic models, not <code>langchain-anthropic</code></td><td>Validated structured output with one less layer; easy to swap out under <code>llm/client.py</code></td></tr>
+      <tr><td>Claude Opus 5.5 for Intake, Explainer and action plan; Claude Sonnet 5.5 for the Critic</td><td>D6: a different model and prompt for the reviewer. Both can be changed in <code>.env</code></td></tr>
+      <tr><td>The LLM never picks a color, a number or a graph edge</td><td>D7: anything an auditor asks about is reproducible</td></tr>
+      <tr><td>Numbers check against a facts sheet</td><td>The Critic can verify every number in the report mechanically (rule 3)</td></tr>
+      <tr><td>The <code>townhouse</code> value stays and Intake asks "PUD or condo?"</td><td>Backward compatible; answers go to <code>townhouse_pud</code> or <code>townhouse_condo</code></td></tr>
+      <tr><td>Not in this pass: scenario fan-out (<code>suggest_levers</code>), Streamlit UI, back-end DTI with housing costs</td><td>Fan-out needs the real Lender Match and Risk to mean anything. The UI was out of scope. DTI inputs are tied to Peter's models.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Built and tested</h2>
+  <p class="prose">56 tests pass with <code>NAVIGATOR_LLM=off</code> and the stand-in specialists: no network and no API key. Each test file matches one package.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Test file</th><th>What it proves</th><th>design.md items closed</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_graph.py</code></td><td>Full loop: baseline, what-ifs, rerun only what changed, done and give up end in a plan and sign-off</td><td>§7.7 stopping, §7.10</td></tr>
+      <tr><td><code>test_schema.py</code></td><td>Down payment above price or savings, zero income, a stale county after a state change are all rejected</td><td>B3, B4, B5, E-I2, E-I4, E-W2</td></tr>
+      <tr><td><code>test_intake.py</code></td><td>Missing fields asked, PUD or condo asked, out-of-area explained, high DTI confirmed, at most 3 questions, free text, counselor handoff, no protected-trait fields</td><td>E-I1, E-I3, E-I5, E-I7, E-I9, E-I15</td></tr>
+      <tr><td><code>test_explainer.py</code></td><td>Top-3 mean, not the max; small lenders left out; credit below 620 caps at yellow; DTI over 50% raises to yellow; no comparing unlike sources</td><td>B8, D8, E-M7, E-M8, E-O6</td></tr>
+      <tr><td><code>test_critic.py</code></td><td>Each rule catches its problem; a clean template report passes</td><td>§7.6 rules 1 to 7</td></tr>
+      <tr><td><code>test_human.py</code></td><td>No-op what-if, unclear reply, non-editable field, branching, free-text what-if, vague what-if, escalation, counselor edit, failed report held back, round limit, wrap-up offer</td><td>B2, B9, B10, B11, D15, E-W1, E-W5, E-W6, E-W9, E-W10, E-W12, E-O1</td></tr>
+      <tr><td><code>test_specialists.py</code></td><td>A failing or slow specialist becomes "unavailable"; with everything down the case goes to a counselor and no numbers are invented</td><td>E-O2, E-O3</td></tr>
+      <tr><td><code>test_stop.py</code></td><td>Plan length and handoff line; an LLM rewrite that adds decision language is thrown out</td><td>§7.10</td></tr>
+      <tr><td><code>test_llm.py</code></td><td>With a fake model: the LLM narrative is used and reviewed, a review issue sends the draft back, a refusal falls back to the template and escalates</td><td>E-O4, E-O5, §7.8</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Notes for Peter</h2>
+  <ol class="steps">
+    <li>Nothing in <code>agents/lender_match.py</code>, <code>risk.py</code> or <code>policy.py</code> changed. <code>agents/_common.py</code> now re-exports <code>core/case.py</code>, so your imports still work.</li>
+    <li>Property type can now be <code>townhouse_pud</code> or <code>townhouse_condo</code>. The Policy stand-in checks for <code>"townhouse"</code>, so it should treat <code>townhouse_condo</code> like a condo.</li>
+    <li>A failed specialist is now <code>source="unavailable"</code> in the schema. Lender Match can return that instead of stand-in numbers when the service is down (B7).</li>
+    <li>The signals use <code>historical_applications</code> to leave out lenders with under 200 applications, so please keep filling it from the service.</li>
+  </ol>
+</section>
+
+<div class="note">
+  <p style="margin:0">To check it yourself: <code>cd orchestrator &amp;&amp; .venv/bin/python -m pytest</code>, then <code>NAVIGATOR_LLM=off ASSUMED_RATE_PCT=6.5 .venv/bin/python scripts/demo.py</code> to watch a full session in the terminal.</p>
+</div>
+</div>

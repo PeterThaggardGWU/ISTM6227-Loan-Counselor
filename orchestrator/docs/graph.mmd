@@ -12,18 +12,24 @@ graph TD;
 	explainer(explainer)
 	critic(critic)
 	publish_report(publish_report)
+	counselor_review(counselor_review)
 	await_borrower(await_borrower)
 	apply_what_if(apply_what_if)
-	finish(finish)
+	action_plan(action_plan)
+	counselor_signoff(counselor_signoff)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> intake;
+	action_plan --> counselor_signoff;
 	apply_what_if -.-> await_borrower;
 	apply_what_if -.-> explainer;
 	apply_what_if -.-> lender_match;
 	apply_what_if -.-> policy;
 	apply_what_if -.-> risk;
+	await_borrower -.-> action_plan;
 	await_borrower -.-> apply_what_if;
-	await_borrower -.-> finish;
+	counselor_review -.-> action_plan;
+	counselor_review -.-> await_borrower;
+	counselor_signoff -.-> __end__;
 	critic -.-> explainer;
 	critic -.-> publish_report;
 	explainer --> critic;
@@ -33,11 +39,14 @@ graph TD;
 	intake -.-> risk;
 	lender_match --> explainer;
 	policy --> explainer;
+	publish_report -.-> action_plan;
 	publish_report -.-> await_borrower;
-	publish_report -.-> finish;
+	publish_report -.-> counselor_review;
 	risk --> explainer;
-	finish --> __end__;
 	await_borrower -.-> await_borrower;
+	counselor_review -.-> counselor_review;
+	counselor_signoff -.-> counselor_signoff;
+	intake -.-> intake;
 	classDef default fill:#f2f0ff,line-height:1.2
 	classDef first fill-opacity:0
 	classDef last fill:#bfb6fc

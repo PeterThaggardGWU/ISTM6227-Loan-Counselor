@@ -30,6 +30,12 @@ AFFECTS: dict[str, frozenset[str]] = {
 }
 
 
+# What a borrower (or counselor) may change in a what-if. Anything else, including
+# where the borrower lives now and any field that could carry a protected trait,
+# is rejected before a scenario is created (design.md E-W5, §10.1).
+EDITABLE_PATHS: frozenset[str] = frozenset(AFFECTS)
+
+
 def agents_to_rerun(changed_paths: Iterable[str]) -> list[str]:
     needed: set[str] = set()
     for path in changed_paths:

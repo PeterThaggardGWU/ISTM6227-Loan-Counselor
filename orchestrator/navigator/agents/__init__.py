@@ -1,7 +1,10 @@
-"""Agent nodes. Each reads the current scenario from the case file and returns
-only its own result key, so agents that run in parallel never write the same key.
+"""Specialist agents: Lender Match, Risk and Policy (Peter's; the gray box).
 
-STAND-INS: risk.py, policy.py, explainer.py and critic.py are deterministic
-placeholders so the loop runs end to end without LLM calls. lender_match.py calls
-the real Lender Match service when LENDER_MATCH_URL is set.
+Contract: fn(state) -> {"<name>": <result dict>} with a LenderMatchResult,
+RiskResult or PolicyResult from mrn_shared. The graph wraps each one in
+core.specialists.guarded(), so a failure or timeout becomes an "unavailable"
+result instead of stopping the session.
+
+The non-gray agents live in their own packages: intake/, explainer/, critic/,
+human/ (borrower and counselor) and stop/.
 """

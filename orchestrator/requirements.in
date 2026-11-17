@@ -7,7 +7,7 @@
 
 langgraph>=1.2
 langgraph-cli[inmem]          # `langgraph dev` + Studio
-langchain-anthropic           # Claude, for the LLM agents (not used by the stand-ins)
+anthropic>=2.10                # Claude (official SDK): Intake, Explainer, Critic, action plan
 langchain-mcp-adapters        # MCP tools for LLM agents
 pydantic>=2.7
 httpx                         # calls the Lender Match service

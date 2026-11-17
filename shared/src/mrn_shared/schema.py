@@ -1,5 +1,5 @@
 """
-Case-file schema for Mortgage Readiness Navigator — DRAFT v0.1.
+Case-file schema for Mortgage Readiness Navigator — DRAFT v0.2 (see SCHEMA_VERSION).
 
 Every component reads and writes these structures:
   - Intake fills a BorrowerProfile.
@@ -17,20 +17,35 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+SCHEMA_VERSION = "0.2"
 
 __all__ = [
-    "PropertyType", "Debt", "Borrower", "Finances", "Purchase", "BorrowerProfile",
+    "SCHEMA_VERSION", "STATE_FIPS", "PropertyType", "Debt", "Borrower", "Finances", "Purchase", "BorrowerProfile",
     "Derived", "LenderOption", "LenderMatchResult", "RiskResult", "Citation",
-    "PolicyResult", "Signal", "Report", "Scenario", "CaseFile",
+    "PolicyResult", "Signal", "Report", "CriticRound", "Scenario", "Event", "Note", "CaseFile",
 ]
+
+# Two-digit state FIPS codes; a county FIPS starts with its state's code.
+STATE_FIPS = {
+    "AL": "01", "AK": "02", "AZ": "04", "AR": "05", "CA": "06", "CO": "08", "CT": "09", "DE": "10",
+    "DC": "11", "FL": "12", "GA": "13", "HI": "15", "ID": "16", "IL": "17", "IN": "18", "IA": "19",
+    "KS": "20", "KY": "21", "LA": "22", "ME": "23", "MD": "24", "MA": "25", "MI": "26", "MN": "27",
+    "MS": "28", "MO": "29", "MT": "30", "NE": "31", "NV": "32", "NH": "33", "NJ": "34", "NM": "35",
+    "NY": "36", "NC": "37", "ND": "38", "OH": "39", "OK": "40", "OR": "41", "PA": "42", "RI": "44",
+    "SC": "45", "SD": "46", "TN": "47", "TX": "48", "UT": "49", "VT": "50", "VA": "51", "WA": "53",
+    "WV": "54", "WI": "55", "WY": "56", "PR": "72",
+}
 
 
 # ── Borrower profile (what Intake collects) ───────────────────────────────────
 
 class PropertyType(str, Enum):
     SINGLE_FAMILY = "single_family"   # detached house
-    TOWNHOUSE = "townhouse"           # Fannie Mae codes it as PUD or condo; Intake must ask which
+    TOWNHOUSE = "townhouse"           # ambiguous: Fannie Mae codes it as PUD or condo; Intake asks which
+    TOWNHOUSE_PUD = "townhouse_pud"   # townhouse in a planned unit development
+    TOWNHOUSE_CONDO = "townhouse_condo"  # townhouse owned as a condo unit (project review applies)
     CONDO = "condo"
 
 
@@ -53,7 +68,7 @@ class Borrower(BaseModel):
 
 
 class Finances(BaseModel):
-    annual_income: float = Field(ge=0, description="Gross yearly income of all borrowers, dollars")
+    annual_income: float = Field(gt=0, description="Gross yearly income of all borrowers, dollars")
     monthly_debts: list[Debt] = Field(default_factory=list,
                                       description="Recurring debts that will remain after closing")
     savings: float = Field(default=0, ge=0,
@@ -74,11 +89,29 @@ class Purchase(BaseModel):
     occupancy: Literal["primary"] = "primary"   # scope: buyers purchasing a home to live in
     units: int = Field(default=1, ge=1, le=4)
 
+    @model_validator(mode="after")
+    def _consistent(self):
+        self.target_state = self.target_state.upper()
+        if self.down_payment > self.purchase_price:
+            raise ValueError("The down payment can't be larger than the purchase price.")
+        if self.target_county_fips:
+            state_code = STATE_FIPS.get(self.target_state)
+            if state_code and not self.target_county_fips.startswith(state_code):
+                raise ValueError(f"County {self.target_county_fips} is not in {self.target_state}; "
+                                 f"pick a county in {self.target_state}.")
+        return self
+
 
 class BorrowerProfile(BaseModel):
     borrower: Borrower = Field(default_factory=Borrower)
     finances: Finances
     purchase: Purchase
+
+    @model_validator(mode="after")
+    def _down_payment_within_savings(self):
+        if self.purchase.down_payment > self.finances.savings:
+            raise ValueError("The down payment is larger than the savings entered.")
+        return self
 
 
 class Derived(BaseModel):
@@ -99,7 +132,7 @@ class Derived(BaseModel):
 
 # ── Agent results ─────────────────────────────────────────────────────────────
 
-Source = Literal["service", "stub"]
+Source = Literal["service", "stub", "unavailable"]   # unavailable = the agent failed or timed out
 
 
 class LenderOption(BaseModel):
@@ -147,18 +180,33 @@ class Signal(str, Enum):
     NOT_ASSESSED = "not_assessed"
 
 
+class CriticRound(BaseModel):
+    """One Critic pass over one draft; kept for evaluation."""
+    passed: bool
+    fixes: list[str] = Field(default_factory=list)
+    reviewer: Literal["rules", "rules+llm"] = "rules"
+
+
 class Report(BaseModel):
     approval_signal: Signal = Field(description="'Can you get approved?' — from Lender Match")
     sustainability_signal: Signal = Field(description="'Can you sustain the payments?' — from Risk")
     markdown: str
     citations: list[Citation] = Field(default_factory=list)
+    facts: dict[str, str] = Field(default_factory=dict,
+                                  description="Every value the report may state (explainer/facts.py)")
+    writer: Literal["template", "llm"] = "template"
+    status: Literal["draft", "passed", "needs_review", "approved"] = "draft"
     critic_notes: list[str] = Field(default_factory=list)
+    critic_rounds: list[CriticRound] = Field(default_factory=list)
     revisions: int = 0
+    original_markdown: Optional[str] = Field(default=None, description="Set when a counselor edits the report")
 
 
 class Scenario(BaseModel):
     id: int
     label: str
+    kind: Literal["baseline", "what_if", "suggested"] = "baseline"
+    origin: Literal["borrower", "counselor", "system"] = "borrower"
     parent_id: Optional[int] = None
     changes: dict[str, Any] = Field(default_factory=dict,
                                     description="Dotted field path -> new value, relative to the parent")
@@ -172,10 +220,36 @@ class Scenario(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class Event(BaseModel):
+    """One entry in the case's append-only audit log."""
+    at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    kind: str = Field(description="e.g. intake_complete, ran_agents, agent_unavailable, critic_failed, "
+                                  "escalated, counselor_action, what_if_rejected, stopped")
+    detail: dict[str, Any] = Field(default_factory=dict)
+
+
+class Note(BaseModel):
+    at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    scenario_id: Optional[int] = None
+    text: str
+
+
+EndedReason = Literal["done", "gave_up", "max_rounds", "no_progress", "intake_handoff"]
+
+
 class CaseFile(BaseModel):
+    schema_version: str = SCHEMA_VERSION
     session_id: str
-    status: Literal["intake", "running", "awaiting_borrower", "done", "gave_up"] = "intake"
+    status: Literal["intake", "running", "awaiting_borrower", "needs_review",
+                    "done", "gave_up", "signed_off"] = "intake"
+    ended_reason: Optional[EndedReason] = None
     scenarios: list[Scenario] = Field(default_factory=list)
+    events: list[Event] = Field(default_factory=list)
+    counselor_notes: list[Note] = Field(default_factory=list)
+    action_plan: list[str] = Field(default_factory=list)
+
+    def log(self, kind: str, **detail) -> None:
+        self.events.append(Event(kind=kind, detail=detail))
 
     def current(self) -> Scenario:
         return self.scenarios[-1]

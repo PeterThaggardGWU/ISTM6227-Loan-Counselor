@@ -23,8 +23,8 @@ Alekya Kowta
 | Folder | What it is | Status |
 |---|---|---|
 | [`lender_match/`](lender_match/README.md) | HMDA-trained lender-recommendation service and its MCP server, formerly **Loan Arranger** | Working |
-| [`orchestrator/`](orchestrator/README.md) | The Orchestrator loop (LangGraph), the shared case file, and the agents: Intake, Lender Match, Risk, Policy, Explainer, Critic | Skeleton with stand-in agents; calls the real Lender Match |
-| [`shared/`](shared/README.md) | The borrower-profile and case-file schema that every component uses | Draft v0.1 |
+| [`orchestrator/`](orchestrator/README.md) | The Orchestrator loop (LangGraph) and its agents: Intake, Explainer, Critic, the borrower and counselor steps, and the action plan; it calls Lender Match, Risk and Policy | Loop, escalation and stopping rules done; LLM agents with rule-based fallbacks; Risk and Policy are still stand-ins |
+| [`shared/`](shared/README.md) | The borrower-profile and case-file schema that every component uses | Draft v0.2 |
 | [`risk/`](risk/README.md) | Early-delinquency model for a new conventional loan, trained in the MRI project, behind an MCP server | Planned |
 | [`policy/`](policy/README.md) | Guideline sources for retrieval (RAG): the Selling Guide, Servicing Guide, Regulation B and HMDA rules | Sources only |
 | `docs/` | Proposal and design documents | — |
